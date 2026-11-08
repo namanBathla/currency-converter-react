@@ -7,12 +7,11 @@ function App() {
   // https://restcurrencies.com/v3.1/all?fields=cca3
 
   const [currencies, setCurrencies] = useState([]);
-  const [fromCurrency, setfromCurrency] = useState("USD");
-  const [toCurrency, settoCurrency] = useState("INR");
-  const [amount, setAmount] = useState(100);
-  const [convertedAmount, setConvertedAmount] = useState(' ');
+  const [fromCurrency, setFromCurrency] = useState("USD");
+  const [toCurrency, setToCurrency] = useState("INR");
+  const [amount, setAmount] = useState("100");
   const [isLoading, setIsLoading] = useState(false);
-
+  const [finalString, setFinalString] = useState("-");
 
   // fetching currencies from frankfurter api, also same for conversion
   useEffect(() => {
@@ -21,51 +20,53 @@ function App() {
       .then((data) => {
         setCurrencies(Object.keys(data));
         // console.log(data);
-      })
-  }, [])
+      });
+  }, []);
+
+  useEffect(() => {
+    if(currencies.length > 0) convert();
+  }, [currencies]);
 
   // added debouncing effect to reduce API calls
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      if (amount > 0 && fromCurrency !== toCurrency) {
-        convert();
-      }
-    }, 500); // 500ms debounce
-    
-    // convert();
-    return () => clearTimeout(debounceTimer); // cleanup on change
-  }, [amount, fromCurrency, toCurrency]);
+  // useEffect(() => {
+  //   const debounceTimer = setTimeout(() => {
+  //     if (amount > 0 && fromCurrency !== toCurrency) {
+  //       convert();
+  //     }
+  //   }, 500); // 500ms debounce
 
+  //   // convert();
+  //   return () => clearTimeout(debounceTimer); // cleanup on change
+  // }, [amount, fromCurrency, toCurrency]);
 
   const swapcurrencies = () => {
-    setfromCurrency(toCurrency);
-    settoCurrency(fromCurrency);
+    setFromCurrency(toCurrency);
+    setToCurrency(fromCurrency);
+    setFinalString("-");
   };
 
-  const isLocal = window.location.hostname === 'localhost';
-
-// Use local proxy for development, direct API for production
-  const API_URL = '/api-frankfurter';
+  // Use local proxy for development, direct API for production
+  const API_URL = "/api-frankfurter";
 
   const convert = () => {
-    setIsLoading(true);         // start loading
+    setIsLoading(true); // start loading
     // https://api.frankfurter.app/latest?from=USD&to=INR
-    const url = `${API_URL}/v2/rates?base=${fromCurrency}&quotes=${toCurrency}`;
+    const url = `${API_URL}/v2/rate/${fromCurrency.toLowerCase()}/${toCurrency.toLowerCase()}`;
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        const rate = data[0].rate;
-        const convertedAmount = (amount * rate).toFixed(2);
+        const rate = data.rate;
+        const convertedAmount = (Number(amount) * rate).toFixed(2);
         console.log(rate);
-        setConvertedAmount(convertedAmount);
+        setFinalString(`${amount} ${fromCurrency} = ${convertedAmount} ${toCurrency}`);
       })
       .catch((err) => {
         console.log("Conversion Error: " + err);
-        setConvertedAmount("Error");
+        setFinalString("Error fetching rates");
       })
       .finally(() => {
-        setIsLoading(false);    // stop loading
-      })
+        setIsLoading(false); // stop loading
+      });
   };
 
   return (
@@ -81,8 +82,8 @@ function App() {
             id=""
             value={amount}
             onChange={(e) => {
-              setAmount(e.target.value)
-              // setConvertedAmount(' ');
+              setAmount(e.target.value);
+              setFinalString('-');
             }}
             className="rounded p-4 h-5 w-full bg-slate-800 appearance-none outline-none"
           />
@@ -93,7 +94,10 @@ function App() {
             type="From"
             currencies={currencies}
             selected={fromCurrency}
-            setSelected={setfromCurrency}
+            setSelected={(val) => {
+              setFromCurrency(val);
+              setFinalString('-');
+            }}
           ></Selector>
 
           {/* Add the swap icon here */}
@@ -106,23 +110,29 @@ function App() {
             type="To"
             currencies={currencies}
             selected={toCurrency}
-            setSelected={settoCurrency}
+            setSelected={(val) => {
+              setToCurrency(val);
+              setFinalString('-');
+            }}
           ></Selector>
         </div>
 
-        <button className="p-3 rounded-md bg-green-500 text-white "
+        <button
+          className="p-3 rounded-md disabled:bg-green-300 bg-green-500 text-white disabled:cursor-not-allowed"
           onClick={convert}
-          disabled={(amount <= 0 || fromCurrency == toCurrency)}
+          disabled={Number(amount) <= 0 || fromCurrency === toCurrency}
         >
           Get Exchange Rate
         </button>
 
         <div className="converted bg-slate-800 w-full text-center p-2 rounded">
-          {isLoading ? (<span>Loading...</span>) :
-            (convertedAmount === ' '
-              ? 'Select currencies to convert'
-              : `${amount} ${fromCurrency} = ${convertedAmount} ${toCurrency}`
-            )}
+          {isLoading ? (
+            <span>Loading...</span>
+          ) : !amount || amount <= 0 ? (
+            "Enter amount to convert"
+          ) : (
+            finalString
+          )}
         </div>
       </div>
     </>

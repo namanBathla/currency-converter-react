@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api-frankfurter/(.*)",
-      "destination": "https://frankfurter.dev*"
+      "destination": "https://frankfurter.dev"
     }
   ]
 }
