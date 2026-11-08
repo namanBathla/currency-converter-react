@@ -50,11 +50,11 @@ function App() {
   const convert = () => {
     setIsLoading(true);         // start loading
     // https://api.frankfurter.app/latest?from=USD&to=INR
-    const url = `${API_URL}/latest?from=${fromCurrency}&to=${toCurrency}`;
+    const url = `${API_URL}/v2/rates?base=${fromCurrency}&quotes=${toCurrency}`;
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        const rate = data.rates[toCurrency];
+        const rate = data[0].rate;
         const convertedAmount = (amount * rate).toFixed(2);
         console.log(rate);
         setConvertedAmount(convertedAmount);
