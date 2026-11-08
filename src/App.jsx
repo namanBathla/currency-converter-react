@@ -42,10 +42,17 @@ function App() {
     settoCurrency(fromCurrency);
   };
 
+  const isLocal = window.location.hostname === 'localhost';
+
+// Use local proxy for development, direct API for production
+  const API_URL = isLocal 
+    ? '/api-frankfurter' 
+    : 'https://frankfurter.app';
+
   const convert = () => {
     setIsLoading(true);         // start loading
     // https://api.frankfurter.app/latest?from=USD&to=INR
-    const url = `/api-frankfurter/latest?from=${fromCurrency}&to=${toCurrency}`;
+    const url = `${API_URL}/latest?from=${fromCurrency}&to=${toCurrency}`;
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
