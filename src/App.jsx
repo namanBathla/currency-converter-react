@@ -13,30 +13,6 @@ function App() {
   const [convertedAmount, setConvertedAmount] = useState(' ');
   const [isLoading, setIsLoading] = useState(false);
 
-  // load currencies on initial render
-  // fetching currencies from rest currencies api - gives dupli and no conversion api available to support all currencies
-  /*
-  useEffect(() => {
-    fetch("https://restcurrencies.com/v3.1/all?fields=currencies")
-      .then((res) => res.json())
-      .then((data) => {
-        const codesArray = [];
-        // console.log("type: " + typeof code);
-
-        data.forEach((obj) => {
-          const code = Object.keys(obj.currencies);
-          // console.log("type: " + typeof code);
-          codesArray.push(...code);
-        });
-
-        // const sortedArray = [...new Set(codesArray)].sort();   // use spread to make it to an array
-        const sortedArray = Array.from(new Set(codesArray)).sort();
-        setCurrencies(sortedArray);
-        // console.log(sortedArray);
-      });
-  }, []);
-
-  */
 
   // fetching currencies from frankfurter api, also same for conversion
   useEffect(() => {
@@ -69,8 +45,7 @@ function App() {
   const convert = () => {
     setIsLoading(true);         // start loading
     // https://api.frankfurter.app/latest?from=USD&to=INR
-    const url = `https://api.frankfurter.app/latest?from=${fromCurrency}&to=${toCurrency}
-`;
+    const url = `/api-frankfurter/latest?from=${fromCurrency}&to=${toCurrency}`;
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
@@ -132,7 +107,7 @@ function App() {
 
         <button className="p-3 rounded-md bg-green-500 text-white "
           onClick={convert}
-          disabled={(amount <= 0 || fromCurrency == toCurrency) ? true : false}
+          disabled={(amount <= 0 || fromCurrency == toCurrency)}
         >
           Get Exchange Rate
         </button>
