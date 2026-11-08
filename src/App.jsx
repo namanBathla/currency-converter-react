@@ -45,9 +45,7 @@ function App() {
   const isLocal = window.location.hostname === 'localhost';
 
 // Use local proxy for development, direct API for production
-  const API_URL = isLocal 
-    ? '/api-frankfurter' 
-    : 'https://frankfurter.app';
+  const API_URL = '/api-frankfurter';
 
   const convert = () => {
     setIsLoading(true);         // start loading
